@@ -78,7 +78,7 @@ jobs:
           sudo apt install libxcb-cursor0
       - name: Build with pyinstaller for ${{matrix.os}}
         run: >
-          pyinstaller
+          pipenv run pyinstaller
           -n 'USDB_Syncer-${{github.ref_name}}-${{matrix.TARGET}}'
           ${{matrix.PYINSTALLER_ARGS}}
           src/usdb_syncer/gui/__init__.py
