@@ -17,6 +17,7 @@ jobs:
             PYINSTALLER_ARGS: >-
               --onefile
               --add-data 'src/usdb_syncer/db/sql:src/usdb_syncer/db/sql'
+              --add-data '.venv/lib/python3.11/site-packages/PySide6/Qt/plugins:PySide6/plugins'
           - os: macos-latest
             TARGET: macOS
             PYINSTALLER_ARGS: >-
@@ -51,7 +52,7 @@ jobs:
           python -m pip install pipenv
       - name: Install dependencies
         run: |
-          pipenv sync --system
+          pipenv sync --dev
       - name: Prepend src to PYTHONPATH (Windows)
         run: |
           echo "PERSISTENT_PYTHONPATH=$(pwd)\src;$env:PYTHONPATH" >> $env:GITHUB_ENV
@@ -62,14 +63,14 @@ jobs:
         if: matrix.TARGET == 'Linux' || matrix.TARGET == 'macOS'
       - name: Write version and commit hash
         run: >
-          python -m src.tools.write_release_info
+          pipenv run python -m src.tools.write_release_info
           -p src/usdb_syncer/constants.py
           -v ${{ github.ref_name }}
           -c ${{ github.workflow_sha }}
         env:
           PYTHONPATH: ${{ env.PERSISTENT_PYTHONPATH }}
       - name: Generate GUI elements
-        run: python -m src.tools.generate_pyside_files
+        run: pipenv run python -m src.tools.generate_pyside_files
         env:
           PYTHONPATH: ${{ env.PERSISTENT_PYTHONPATH }}
       - name: add dependencies for xcb support
@@ -78,7 +79,7 @@ jobs:
           sudo apt install libxcb-cursor0
       - name: Build with pyinstaller for ${{matrix.os}}
         run: >
-          pyinstaller
+          pipenv run pyinstaller
           -n 'USDB_Syncer-${{github.ref_name}}-${{matrix.TARGET}}'
           ${{matrix.PYINSTALLER_ARGS}}
           src/usdb_syncer/gui/__init__.py
